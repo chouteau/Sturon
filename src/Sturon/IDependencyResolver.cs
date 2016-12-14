@@ -10,5 +10,6 @@ namespace Sturon
 		object GetService(Type serviceType);
 		IEnumerable<object> GetServices(Type serviceType);
 		IEnumerable<object> GetAllServices();
+		IDisposable SturonContainer { get; }
 	}
 }

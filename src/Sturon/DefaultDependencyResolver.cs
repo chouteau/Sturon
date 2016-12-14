@@ -30,5 +30,13 @@ namespace Sturon
 		{
 			throw new NotImplementedException();
 		}
+
+		public IDisposable SturonContainer
+		{
+			get
+			{
+				return null;
+			}
+		}
 	}
 }

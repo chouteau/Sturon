@@ -19,5 +19,6 @@ namespace Sturon
 		public virtual void Stop()
 		{
 		}
+
 	}
 }
