@@ -19,10 +19,6 @@ namespace Sturon.Configuration
 				if (m_AppSettings == null)
 				{
 					m_AppSettings = (NameValueCollection)System.Configuration.ConfigurationManager.GetSection(SECTION_NAME);
-					if (m_AppSettings == null)
-					{
-						throw new System.Configuration.ConfigurationErrorsException("sturon section not found");
-					}
 				}
 				return m_AppSettings;
 			}

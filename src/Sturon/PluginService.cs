@@ -8,7 +8,6 @@ namespace Sturon
 {
 	public class PluginService
 	{
-		internal Lazy<List<PluginItem>> m_LazyLoader = new Lazy<List<PluginItem>>(LoadConfiguration, true);
 		private static Lazy<PluginService> m_LazyPluginService = new Lazy<PluginService>(() =>
 			{
 				return new PluginService();
@@ -16,6 +15,8 @@ namespace Sturon
 
 		private PluginService()
 		{
+			Plugins = new List<PluginItem>();
+			Builders = new List<PluginBuilder>();
 		}
 
 		private static PluginService Current
@@ -26,15 +27,19 @@ namespace Sturon
 			}
 		}
 
-		internal List<PluginItem> Plugins { get; set; }
+		internal List<PluginItem> Plugins { get; set; } 
 		internal List<PluginBuilder> Builders { get; set; }
 
 		public static void RegisterServices()
 		{
-			Current.Plugins = Current.m_LazyLoader.Value;
-			if (Current.Plugins == null)
+			// Merge Config file with existing list
+			var pluginsFromConfig = LoadConfiguration();
+			if (pluginsFromConfig != null && pluginsFromConfig.Count > 0)
 			{
-				return;
+				foreach (var plugin in pluginsFromConfig)
+				{
+					RegisterPlugin(plugin);
+				}
 			}
 
 			Current.Builders = new List<PluginBuilder>();
@@ -72,9 +77,36 @@ namespace Sturon
 			}
 		}
 
+		public static void RegisterPlugin(string assemblyFileName)
+		{
+			if (string.IsNullOrWhiteSpace(assemblyFileName))
+			{
+				return;
+			}
+			var plugin = new PluginItem()
+			{
+				AssemblyFileName = assemblyFileName
+			};
+			RegisterPlugin(plugin);
+		}
+
+		static void RegisterPlugin(PluginItem item)
+		{
+			if (Current.Plugins.Any(i => i.AssemblyFileName.Equals(item.AssemblyFileName, StringComparison.InvariantCultureIgnoreCase)))
+			{
+				return;
+			}
+			Current.Plugins.Add(item);
+		}
+
 		static List<PluginItem> LoadConfiguration()
 		{
 			var result = new List<PluginItem>();
+			var settings = Configuration.ConfigurationSettings.AppSettings;
+			if (settings == null)
+			{
+				return result;
+			}
 			foreach (var key in Configuration.ConfigurationSettings.AppSettings.AllKeys)
 			{
 				var value = Configuration.ConfigurationSettings.AppSettings[key];
